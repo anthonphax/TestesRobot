@@ -125,11 +125,11 @@ type
 
 selectAndWait
     [Arguments]        ${element}  ${value}
-    Select From List   ${element}  ${value}
+    Select From List By Value   ${element}  ${value}
 
 select
     [Arguments]        ${element}  ${value}
-    Select From List   ${element}  ${value}
+    Select From List By Value   ${element}  ${value}
 
 verifyValue
     [Arguments]                  ${element}  ${value}

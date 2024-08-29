@@ -1,5 +1,6 @@
 *** Settings ***
 Library  SeleniumLibrary
+Library  String
 
 *** Variables ***
 ${BROWSER}   firefox
@@ -24,12 +25,9 @@ open
     [Arguments]    ${element}
     Go To          ${element}
 
-clickAndWait
-    [Arguments]    ${element}
-    Click Element  ${element}
-
 click
     [Arguments]    ${element}
+    Wait Until Element Is Visible        ${element}        timeout=20s
     Click Element  ${element}
 
 sendKeys
@@ -46,11 +44,11 @@ type
 
 selectAndWait
     [Arguments]        ${element}  ${value}
-    Select From List   ${element}  ${value}
+    Select From List By Value   ${element}  ${value}
 
 select
     [Arguments]        ${element}  ${value}
-    Select From List   ${element}  ${value}
+    Select From List By Value   ${element}  ${value}
 
 verifyValue
     [Arguments]                  ${element}  ${value}
@@ -161,3 +159,22 @@ setSpeedAndWait
 verifyAlert
     [Arguments]              ${value}
     Alert Should Be Present  ${value}
+
+covertToNumber
+    [Arguments]              ${value}
+    TRY
+        ${value}=    Evaluate    int(re.search("\\d+$","${value}")[0])     modules=re
+    EXCEPT    
+        Log To Console        falha ao converter valor ${value}
+    END
+    RETURN                   ${value}
+
+compareValues
+    [Arguments]              ${value1}    ${value2}
+    ${igualdade}=            Run Keyword And Return Status    Should Be Equal    ${value1}      ${value2}
+    IF    ${igualdade}
+        Log     Valores são Iguais
+    ELSE
+        Fail    Valores não são iguais
+    END
+    

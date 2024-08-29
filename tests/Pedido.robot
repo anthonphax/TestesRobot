@@ -10,30 +10,48 @@ ${BROWSER}   firefox
 ${url}       http://www.automationpractice.pl
 
 ${Menu_Women}    //a[contains(@class, 'sf-with-ul')]
+${categoria}     Blouses
 
 
 *** Test Cases ***
-Untitled Test Case
+Categoria e Página de Produto
     Mouse Over                       ${Menu_Women}
-    Wait Until Element Is Visible    link=Blouses
-    click                            link=Blouses
-    Wait Until Element Is Visible    //*[contains(@class, 'product_img_link')]
+    Wait Until Element Is Visible    link=${categoria}      10s
+    click                            link=${categoria} 
+    # 1. A categoria Blouses possui produtos?
+    ${disponibilidade}=              Run Keyword And Return Status    Wait Until Element Is Visible    //a[@title= "Blouse" and @class="product_img_link"]    timeout=30s
+    Log To Console                   Disponível? ${disponibilidade}
+    Run Keyword If           not ${disponibilidade}        Fail    Seção ${categoria}  não tem produtos 
+    # Preço é armazenado na Página de Produto para comparação futura
+    ${preco_catalogo}=               Get Text       //a[@title= "Blouse" and @class="product_img_link"]/parent::div/parent::*/following-sibling::div/div[@class="content_price"]/span
+    ${preco_catalogo}                covertToNumber        ${preco_catalogo}
+    Set Suite Variable               ${preco_catalogo}
     click                            //*[contains(@class, 'product_img_link')]
     click                            id=color_8
+    # 2. Há estoque de produto? Qual a quantidade?
     ${status_estoque}=               Get Text       id=availability_value
-    ${preco}=                        Get Text       id=our_price_display
+    ${preco_pgproduto}=              Get Text       id=our_price_display
     ${disponibilidade}=              Run Keyword And Return Status                 Should Be Equal    ${Status_estoque}    In stock
-    Run Keyword If                   ${disponibilidade}            Get Text        id=quantityAvailable
-    Log To Console                   Preço: ${preco} | Estoque Status: ${status_estoque}
     IF                               not ${disponibilidade}        
-            Skip            Produto indisponível
-    ELSE
-            ${quantidade_estoque}=   Get Text       id=quantityAvailable
-            Log To Console           ${quantidade_estoque}
+            Skip             Produto indisponível
     END
+    ${quantidade_estoque}=   Get Text       id=quantityAvailable
+    Log To Console           Estoque Inicial: ${quantidade_estoque}
+    Run Keyword If                   ${disponibilidade}            Get Text        id=quantityAvailable
+    Log To Console                   Preço:${preco_pgproduto}| Estoque Status: ${status_estoque}
+    ${preco_pgproduto}                covertToNumber        ${preco_pgproduto}
+    compareValues                    ${preco_catalogo}      ${preco_pgproduto}                        
+    # 3. Produto é adicionado corretamente ao carrinho?
     click                            id=add_to_cart
+    Wait Until Element Is Visible    //*[normalize-space() = "Product successfully added to your shopping cart"]
+
+Checkout
+    click                            //*[contains(@title, 'Proceed to checkout')]
+    ${preco_carrinho}=               Get Text              id:total_price
+    ${preco_carrinho}                covertToNumber        ${preco_carrinho}
+    compareValues                    ${preco_catalogo}     ${preco_carrinho}
     doubleClick    id=total_product_price_2_8_0
-    click    xpath=//div[@id='page']/div[2]
+    click        xpath=//div[@id='page']/div[2]
     click    xpath=//tr[@id='product_2_8_0_0']/td[7]
     click    xpath=//div[@id='center_column']/p[2]/a/span
     click    xpath=//button[@id='SubmitCreate']/span
