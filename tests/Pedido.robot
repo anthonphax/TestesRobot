@@ -35,8 +35,9 @@ Categoria e Página de Produto
     IF                               not ${disponibilidade}        
             Skip             Produto indisponível
     END
-    ${quantidade_estoque}=   Get Text       id=quantityAvailable
-    Log To Console           Estoque Inicial: ${quantidade_estoque}
+    Double Click Element             id=color_8
+    ${quantidade_estoque}=           Get Text       id=quantityAvailable
+    Log To Console                   Estoque Inicial: ${quantidade_estoque}
     Run Keyword If                   ${disponibilidade}            Get Text        id=quantityAvailable
     Log To Console                   Preço:${preco_pgproduto}| Estoque Status: ${status_estoque}
     ${preco_pgproduto}                covertToNumber        ${preco_pgproduto}
@@ -47,70 +48,67 @@ Categoria e Página de Produto
 
 Checkout
     click                            //*[contains(@title, 'Proceed to checkout')]
-    ${preco_carrinho}=               Get Text              id:total_price
+    ${preco_carrinho}=               Get Text              id:total_product_price_2_8_0
     ${preco_carrinho}                covertToNumber        ${preco_carrinho}
+    #Me assegurar que estou utilizando preço unitário
+    ${qt_adicionada}=                Get Element Attribute      //*[contains(@class, 'cart_quantity_input')]    value
+    ${qt_adicionada}                 covertToNumber             ${qt_adicionada}
+#     ${preco_carrinho}=               Convert To Number     ${preco_carrinho}
+#     ${qt_adicionada}=                Convert To Number     ${qt_adicionada}
+    ${preco_carrinho}                Evaluate              ${preco_carrinho}/${qt_adicionada}
+    # Preço do Produto é o mesmo no catálogo e carrinho?
     compareValues                    ${preco_catalogo}     ${preco_carrinho}
-    doubleClick    id=total_product_price_2_8_0
-    click        xpath=//div[@id='page']/div[2]
-    click    xpath=//tr[@id='product_2_8_0_0']/td[7]
-    click    xpath=//div[@id='center_column']/p[2]/a/span
-    click    xpath=//button[@id='SubmitCreate']/span
-    click    xpath=//form[@id='create-account_form']/div
-    click    id=create_account_error
-    click    id=email_create
-    type    id=email_create    teste1@teste.br
-    submit    id=create-account_form
-    click    id=customer_firstname
-    type    id=customer_firstname    tester
-    type    id=customer_lastname    tester
-    click    id=id_gender1
-    click    id=passwd
-    type    id=passwd    123123
-    click    xpath=//form[@id='account-creation_form']/div/div[7]
-    click    id=days
-    select    id=days    regexp:7\s+
-    click    xpath=//option[@value='7']
-    click    id=months
-    select    id=months    regexp:July\s
-    click    xpath=//select[@id='months']/option[8]
-    click    id=years
-    select    id=years    regexp:2014\s+
-    click    xpath=//option[@value='2014']
-    click    xpath=//button[@id='submitAccount']/span
-    click    xpath=//form[@id='add_address']/div[9]
-    click    xpath=//button[@id='submitAddress']/span
-    click    xpath=//div[@id='center_column']/div/div/ol/li[5]
-    click    xpath=//form[@id='add_address']/div[4]
-    click    id=firstname
-    click    id=company
-    type    id=company    Bis2bis
-    click    id=address1
-    type    id=address1    r. fantasma
-    click    id=address2
-    type    id=address2    123
-    click    id=city
-    type    id=city    Ldn
-    click    xpath=//form[@id='add_address']/div[7]
-    click    id=id_state
-    select    id=id_state    Idaho
-    click    xpath=//option[@value='12']
+    click                            //*[(normalize-space() = "Proceed to checkout") and contains(@class, "standard-checkout")]
+    ${mockmail}=                     Generate Random String                 8          [LOWER]
+    click                            id=email_create
+    type                             id=email_create                        ${mockmail}@teste.br
+    submit                           id=create-account_form
+    click                            id=customer_firstname
+    type                             id=customer_firstname                  tester
+    type                             id=customer_lastname                   tester
+    click                            id=id_gender1
+    click                            id=passwd
+    type                             id=passwd                              123123
+    click                            xpath=//form[@id='account-creation_form']/div/div[7]
+    select                           id=days                                16
+    select                           id=months                              7
+    select                           id=years                               2000
+    click                            xpath=//button[@id='submitAccount']/span
+    click                            xpath=//form[@id='add_address']/div[9]
+    click                            xpath=//button[@id='submitAddress']/span
+    click                            xpath=//div[@id='center_column']/div/div/ol/li[5]
+    click                            xpath=//form[@id='add_address']/div[4]
+    click                            id=firstname
+    click                            id=company
+    type                             id=company                             Bis2bis
+    click                            id=address1
+    type                             id=address1                            r. fantasma
+    click                            id=address2
+    type                             id=address2                            123
+    click                            id=city
+    type                             id=city                                Ldn
+    click                            xpath=//form[@id='add_address']/div[7]
+    select                           id=id_state                            1
+    click                            xpath=//option[@value='12']
+    click                            id=postcode
+    click                            xpath=//select[@id='id_country']/option
+    click                            id=phone
+    type                             id=phone                                123123123123
+    click                            id=phone_mobile
+    type                             id=phone_mobile                         1231231231
+    click                            id=other
+    type                             id=other                                131231231
+    click                            id=alias
+    #verifica     The Zip/Postal code you've entered is invalid. It must follow this format: 00000
+    click                            xpath=//button[@id='submitAddress']/span
+    type                             id=postcode                             1
+    click                            xpath=//button[@id='submitAddress']/span
+    
+    Sleep                45
+
+Teste 3
     click    id=postcode
-    click    xpath=//select[@id='id_country']/option
-    click    id=phone
-    type    id=phone    123123123123
-    click    id=phone_mobile
-    type    id=phone_mobile    1231231231
-    click    id=other
-    type    id=other    131231231
-    click    id=alias
-    click    xpath=//button[@id='submitAddress']/span
-    click    xpath=//div[@id='center_column']/div/div
-    click    id=postcode
-    type    id=postcode    1
-    click    xpath=//button[@id='submitAddress']/span
-    click    xpath=//div[@id='center_column']/div/div
-    click    id=postcode
-    type    id=postcode    11122
+    type     id=postcode    11122
     click    xpath=//button[@id='submitAddress']/span
     click    xpath=//div[@id='center_column']/form/p/button/span
     click    xpath=//form[@id='form']/div/div[2]/div/div/div/table/tbody/tr/td[4]

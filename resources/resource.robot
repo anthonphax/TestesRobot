@@ -47,7 +47,7 @@ selectAndWait
     Select From List By Value   ${element}  ${value}
 
 select
-    [Arguments]        ${element}  ${value}
+    [Arguments]                 ${element}  ${value}
     Select From List By Value   ${element}  ${value}
 
 verifyValue
@@ -175,6 +175,6 @@ compareValues
     IF    ${igualdade}
         Log     Valores são Iguais
     ELSE
-        Fail    Valores não são iguais
+        Fail    Valores ${value1} e ${value2} não são iguais
     END
     
