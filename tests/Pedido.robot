@@ -6,8 +6,7 @@ Suite Setup     Abrir Navegador
 Suite Teardown  Close Browser
 
 *** Variables ***
-${BROWSER}   firefox
-${url}       http://www.automationpractice.pl
+${url}           http://www.automationpractice.pl
 
 ${Menu_Women}    //a[contains(@class, 'sf-with-ul')]
 ${categoria}     Blouses
@@ -48,14 +47,12 @@ Categoria e Página de Produto
 
 Checkout
     click                            //*[contains(@title, 'Proceed to checkout')]
-    ${preco_carrinho}=               Get Text              id:total_product_price_2_8_0
-    ${preco_carrinho}                covertToNumber        ${preco_carrinho}
+    ${preco_carrinho}=               Get Text                   id:total_product_price_2_8_0
+    ${preco_carrinho}                covertToNumber             ${preco_carrinho}
     #Me assegurar que estou utilizando preço unitário
     ${qt_adicionada}=                Get Element Attribute      //*[contains(@class, 'cart_quantity_input')]    value
     ${qt_adicionada}                 covertToNumber             ${qt_adicionada}
-#     ${preco_carrinho}=               Convert To Number     ${preco_carrinho}
-#     ${qt_adicionada}=                Convert To Number     ${qt_adicionada}
-    ${preco_carrinho}                Evaluate              ${preco_carrinho}/${qt_adicionada}
+    ${preco_carrinho}                Evaluate                   ${preco_carrinho}/${qt_adicionada}
     # Preço do Produto é o mesmo no catálogo e carrinho?
     compareValues                    ${preco_catalogo}     ${preco_carrinho}
     click                            //*[(normalize-space() = "Proceed to checkout") and contains(@class, "standard-checkout")]
@@ -87,7 +84,6 @@ Checkout
     type                             id=address2                            123
     click                            id=city
     type                             id=city                                Ldn
-    click                            xpath=//form[@id='add_address']/div[7]
     select                           id=id_state                            1
     click                            xpath=//option[@value='12']
     click                            id=postcode
@@ -99,27 +95,25 @@ Checkout
     click                            id=other
     type                             id=other                                131231231
     click                            id=alias
-    #verifica     The Zip/Postal code you've entered is invalid. It must follow this format: 00000
+    # verifica erro de zip code
+    Element Should Contain           //*[contains(@class, 'alert')]          The Zip/Postal code you've entered is invalid. It must follow this format: 00000
     click                            xpath=//button[@id='submitAddress']/span
     type                             id=postcode                             1
     click                            xpath=//button[@id='submitAddress']/span
-    
-    Sleep                45
-
-Teste 3
-    click    id=postcode
-    type     id=postcode    11122
-    click    xpath=//button[@id='submitAddress']/span
-    click    xpath=//div[@id='center_column']/form/p/button/span
-    click    xpath=//form[@id='form']/div/div[2]/div/div/div/table/tbody/tr/td[4]
-    click    xpath=//form[@id='form']/p/button/span
-    click    xpath=//body[@id='order']/div[2]/div/div/a
-    click    id=cgv
-    click    xpath=//form[@id='form']/p/button/span
-    click    link=Pay by check (order processing will be longer)
-    click    xpath=//p[@id='cart_navigation']/button/span
-    click    xpath=//div[@id='center_column']/p
-    click    link=Blouses
-    click    xpath=//div[@id='center_column']/div/div/div[3]
+Pedido Bem-sucedido
+    click                            id=postcode
+    type                             id=postcode                              11122
+    click                            xpath=//button[@id='submitAddress']/span
+    click                            xpath=//*[@name = "processAddress"]
+    click                            //*[@id='cgv']/parent::*
+    click                            xpath=//*[@name = "processCarrier"]
+    Wait Until Element Is Visible    //*[contains(@id,"total_product_price")]
+    ${preco_checkout}=               Get Text                        //*[contains(@id,"total_product_price")]
+    ${preco_checkout}=               covertToNumber                  ${preco_checkout}
+    compareValues                    ${preco_catalogo}               ${preco_checkout}
+    click                            link=Pay by check (order processing will be longer)
+    click                            //*[@id="cart_navigation"]/button
+    Element Should Contain           //*[contains(@class, 'alert')]          Your order on My Shop is complete.
     [Teardown]  Close Browser
+
 
