@@ -7,13 +7,12 @@ Suite Teardown  Close Browser
 
 *** Variables ***
 ${url}           http://www.automationpractice.pl
-
 ${Menu_Women}    //a[contains(@class, 'sf-with-ul')]
 ${categoria}     Blouses
 
 
 *** Test Cases ***
-Categoria e Página de Produto
+Categoria
     Mouse Over                       ${Menu_Women}
     Wait Until Element Is Visible    link=${categoria}      10s
     click                            link=${categoria} 
@@ -27,6 +26,9 @@ Categoria e Página de Produto
     Set Suite Variable               ${preco_catalogo}
     click                            //*[contains(@class, 'product_img_link')]
     click                            id=color_8
+    
+Página de Produto
+    [Tags]        stock    price    product
     # 2. Há estoque de produto? Qual a quantidade?
     ${status_estoque}=               Get Text       id=availability_value
     ${preco_pgproduto}=              Get Text       id=our_price_display
@@ -37,15 +39,21 @@ Categoria e Página de Produto
     Double Click Element             id=color_8
     ${quantidade_estoque}=           Get Text       id=quantityAvailable
     Log To Console                   Estoque Inicial: ${quantidade_estoque}
+    ${quantidade_estoque}            covertToNumber                ${quantidade_estoque}
+    Set Suite Variable               ${quantidade_estoque}
     Run Keyword If                   ${disponibilidade}            Get Text        id=quantityAvailable
     Log To Console                   Preço:${preco_pgproduto}| Estoque Status: ${status_estoque}
     ${preco_pgproduto}                covertToNumber        ${preco_pgproduto}
     compareValues                    ${preco_catalogo}      ${preco_pgproduto}                        
+    # Pega URL do produto para comparar estoque após o pedido
+    ${url_produto}=                  Get Location
+    Set Suite Variable               ${url_produto}
     # 3. Produto é adicionado corretamente ao carrinho?
     click                            id=add_to_cart
     Wait Until Element Is Visible    //*[normalize-space() = "Product successfully added to your shopping cart"]
 
 Checkout
+    [Tags]        price    product
     click                            //*[contains(@title, 'Proceed to checkout')]
     ${preco_carrinho}=               Get Text                   id:total_product_price_2_8_0
     ${preco_carrinho}                covertToNumber             ${preco_carrinho}
@@ -56,6 +64,9 @@ Checkout
     # Preço do Produto é o mesmo no catálogo e carrinho?
     compareValues                    ${preco_catalogo}     ${preco_carrinho}
     click                            //*[(normalize-space() = "Proceed to checkout") and contains(@class, "standard-checkout")]
+
+Formulario de Conta
+    [Tags]        random
     ${mockmail}=                     Generate Random String                 8          [LOWER]
     click                            id=email_create
     type                             id=email_create                        ${mockmail}@teste.br
@@ -71,18 +82,16 @@ Checkout
     select                           id=months                              7
     select                           id=years                               2000
     click                            xpath=//button[@id='submitAccount']/span
+
+Formulario de Endereço
+    [Tags]        zip
     click                            xpath=//form[@id='add_address']/div[9]
     click                            xpath=//button[@id='submitAddress']/span
     click                            xpath=//div[@id='center_column']/div/div/ol/li[5]
     click                            xpath=//form[@id='add_address']/div[4]
-    click                            id=firstname
-    click                            id=company
     type                             id=company                             Bis2bis
-    click                            id=address1
     type                             id=address1                            r. fantasma
-    click                            id=address2
     type                             id=address2                            123
-    click                            id=city
     type                             id=city                                Ldn
     select                           id=id_state                            1
     click                            xpath=//option[@value='12']
@@ -96,14 +105,16 @@ Checkout
     type                             id=other                                131231231
     click                            id=alias
     # verifica erro de zip code
-    Element Should Contain           //*[contains(@class, 'alert')]          The Zip/Postal code you've entered is invalid. It must follow this format: 00000
-    click                            xpath=//button[@id='submitAddress']/span
-    type                             id=postcode                             1
-    click                            xpath=//button[@id='submitAddress']/span
-Pedido Bem-sucedido
     click                            id=postcode
+    type                             id=postcode                              1
+    click                            xpath=//button[@id='submitAddress']/span
+    Element Should Contain           //*[contains(@class, 'alert')]          The Zip/Postal code you've entered is invalid. It must follow this format: 00000
+    # informa zip em formato correto para continuidade de testes
     type                             id=postcode                              11122
     click                            xpath=//button[@id='submitAddress']/span
+
+Pedido Bem-sucedido
+    [Tags]        product    order
     click                            xpath=//*[@name = "processAddress"]
     click                            //*[@id='cgv']/parent::*
     click                            xpath=//*[@name = "processCarrier"]
@@ -114,6 +125,12 @@ Pedido Bem-sucedido
     click                            link=Pay by check (order processing will be longer)
     click                            //*[@id="cart_navigation"]/button
     Element Should Contain           //*[contains(@class, 'alert')]          Your order on My Shop is complete.
-    [Teardown]  Close Browser
 
+Atualizacao de Estoque
+    [Tags]        stock        product
+    Go To                            ${url_produto}
+    ${estoque_atualizado}=           Get Text                      id=quantityAvailable
+    Log To Console                   Estoque Atual: ${estoque_atualizado}
+    ${estoque_atualizado}            covertToNumber                ${estoque_atualizado}
+    Should Not Be Equal As Integers  ${quantidade_estoque}         ${estoque_atualizado}        msg=Estoque não foi atualizado
 
