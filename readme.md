@@ -2,7 +2,7 @@
 
 ## Desafio
 
-    E-commerce: http://www.automationpractice.pl
+Ambiente de Testes (E-commerce): http://www.automationpractice.pl
 
     1. Configurar Robot Framework Localmente  
 
